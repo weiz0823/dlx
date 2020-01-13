@@ -14,35 +14,57 @@ solving & generating.
 
 ## Benchmark result
 
-- Sudoku solving costs 0.28ms on average, testing on 1465 puzzles in puzzle set [data/sudoku/top1465.txt].
-An average of 0.07ms is taken for solving each of the 49151 puzzles in [data/sudoku/sudoku17\_convert.txt].
+- Sudoku solving costs 0.28ms on average, testing on 1465 puzzles in puzzle set [data/sudoku/top1465.txt](data/sudoku/top1465.txt).
+  An average of 0.07ms is taken for solving each of the 49151 puzzles in [data/sudoku/sudoku17_convert.txt](data/sudoku/sudoku17_convert.txt).
 
 - For Sudoku generating, no more than 1s will be take if the limit of clues is higher than 22.
-Limit of 22 may take about 1s to 2s. Limit of 21 may take several seconds.
-Limit of 20 may take much much longer. Strict limits are not tested.
+  Limit of 22 may take about 1s to 2s. Limit of 21 may take several seconds.
+  Limit of 20 may take much much longer. Stricter limits are not tested.
 
-- Hanidoku solving costs 16ms on average, testing on 172 puzzles in puzzle set [data/hanidoku/puzzles.txt].
+- Hanidoku solving costs 16ms on average, testing on 172 puzzles in puzzle set [data/hanidoku/puzzles.txt](data/hanidoku/puzzles.txt).
 
-- For Hanidoku generating, it may often several seconds, but will often give you 5--10 clues,
-because the generating function requires that we can't erase any clue in the puzzle to get another
-puzzle with exactly one solution. The strictest limit tested is 5, and it takes about 5 seconds to generate one puzzle.
+- For Hanidoku generating, it may take several seconds, but will often give you 5--10 clues,
+  because the generating function requires that no clue in the puzzle can be erased to get another
+  puzzle with exactly one solution. The strictest limit tested is 5, and it takes about 5 seconds to generate one puzzle.
+
+### Let's compare!
+
+Here is the test input:
+
+> .2..5.6.8...7..4.....1.3....6..4....3......5........1.7..3.5.........2......8....
+
+There should be only one solution which is
+
+> 127954638536728491498163527961547382384291756275836914742315869813679245659482173
+
+It's one of the hardest puzzles for my DLX solver.
+
+And the results are as follows.
+
+|                         Algorithm                          |   Time   |
+| :--------------------------------------------------------: | :------: |
+|                            DLX                             | 6.483ms  |
+| [depth-first search with heuristic](compare/sudoku_heu.cc) | 33.680ms |
+| [depth-first search (no heuristic)](compare/sudoku_dfs.cc) | 51.271ms |
+
+Brutal-force searching is not too bad, but there is a gap when compared with DLX.
 
 ## Usage of Sudoku & Hanidoku program
 
-There are 3 commands for both program: solve, generate, convert.
+There are 3 commands for both programs: solve, generate, convert.
 Only the first letter is needed.
 Type `./program [command] -h` to see options.
 Input and output are standard I/O by default, but you can redirect.
 
 Note that only one-line format is supported for input, and irrelevant lines may
 cause error, so it's _highly recommended_ that you choose non-verbose one-line
-format for output when doing batch generating, then using convert command to read.
+format for output when doing batch generating, then use convert command to get the reader-friendly format.
 
-## Compiling Sudoku & Hanidoku
+## Compiling Sudoku & Hanidoku program
 
 `make`, `make all`, or `make install` for making both programs,
 `make sudoku` or `make hanidoku` for making single one.
-Binary executable stored in `exe/`.
+Binary executables are stored in `exe/`.
 
 ## Usage of DLX API
 
@@ -54,17 +76,17 @@ cells, for they can represent candidates.
 
 #### Virtual functions that can be redefined
 
-- `bool ColComp(const DlxCell& rhs) const;`
+- `virtual bool ColComp(const DlxCell& rhs) const;`
 
   Function for column heuristic, to choose the best column.
   Default: choose the column with smallest size.
 
-- `bool StopCompare();`
+- `virtual bool StopCompare();`
 
   Function that can stop searching for a better column under certain circumstances.
   Default: when the size of the best column is no more than 1.
 
-- `bool RowComp(const DlxCell& rhs) const;`
+- `virtual bool RowComp(const DlxCell& rhs) const;`
 
   Only used when you choose to sort the rows. To sort the rows in the order defined by this function.
   Default: bigger row is the better one.
@@ -73,7 +95,7 @@ cells, for they can represent candidates.
 
 - `DlxCell(); virtual ~DlxCell(); char __padding__[7] = "7";`
 
-  Trivial construction and destruction. Padding to silence the warning.
+  Trivial construction and destruction. Explicit padding to silence the warning.
 
 - `DlxCell* Row();`
 
@@ -81,7 +103,7 @@ cells, for they can represent candidates.
 
 - `int type_ = 1;`
 
-  Column type, 1 for compulsory (must be covered), 0 for optional (at most one cover).
+  Set column type, 1 for compulsory (must be covered), 0 for optional (at most one cover).
   For dangling cells (will be introduced below), the value is automatically set to
   -1, don't modify.
 
@@ -94,35 +116,35 @@ Nothing needs to be handled except when getting the solution found.
 
 ### Class `DlxGrid`
 
-Methods and properties for the full grid.
+Methods and properties for the full grid. _May be inherited_ to include specific information and functions.
 
 #### Virtual functions that can be redefined
 
-- `void PrintSolution(int count);`
+- `virtual void PrintSolution(int count);`
 
   Function to print the solution of number `count` (starting from 0).
-  As long as all compulsory columns have been covered, it's regarded a solution.
+  As long as all compulsory columns have been covered, it's regarded as a solution.
   Default: claim that the solution number `count` has been found.
 
 #### Public methods and properties
 
 - `DlxGrid(); virtual ~DlxGrid(); char __padding__[3] = "3";`
 
-  Trivial construction and destruction. Padding to silence the warning.
+  Trivial construction and destruction. Explicit padding to silence the warning.
 
 - `DlxStack reserve_stack_, choose_stack_, cover_stack_;`
 
-  `reserve_stack_` stores the preset, `choose_stack_` stores the _cells_ (not rows)
-  that has been chosen, which may be used for printing solution. `cover_stack_`
-  stores the column that has been covered.
+  `reserve_stack_` stores the presets, `choose_stack_` stores the _cells_ (NOT rows)
+  that have been chosen, which may be used for printing solution. `cover_stack_`
+  stores the columns that have been covered.
 
 - `void InitStacks(int row_capacity = -1, int col_capacity = -1);`
 
   Initialize the stacks, when the array will be constructed.
   MUST be called before doing the reservation.
-  `reserve_stack_` and `choose_stack_` will be initialized as `row_capacity` if specified,
+  `reserve_stack_` and `choose_stack_` will be initialized with length of `row_capacity` if specified,
   otherwise will be the count of rows.
-  `cover_stack_` will be initialized as `col_capacity` if specified, otherwise will be
+  `cover_stack_` will be initialized with length of `col_capacity` if specified, otherwise will be
   _four times_ the count of columns.
 
 - `void Insert(DlxCell* cell, DlxCell* pos, char dir);`
@@ -155,15 +177,15 @@ Used for clearing the stack for the next search.
 - `int Search(int max_count = -1);`
 
 Main searching function. You can set the maximum count of solutions to search for.
-$-1$ means no limit.
+![](https://latex.codecogs.com/png.latex?-1) means no limit.
 
 - `DlxCell* GetRandRow();`
 
-Randomly ge ta row that has not been covered. Can be used for generating random presets.
+Randomly get a row that has not been covered. Can be used for generating random presets.
 
 - `int choose_count_ = 0;`
 
-  The counter of the choices made.
+  The counter of the choices made. A simple evalution of the complexity.
 
 - `bool sort_rows_ = 0;`
 
@@ -184,18 +206,18 @@ Protected. Row cells should be added to the column of `head_`, column cells shou
 1. Call `InitStack(row_capacity, col_capacity)` to manually or automatically set
    the size of stacks, to construct the array in stack.
 
-1. Call `Reserve(row_cell)` to set the presets.
+1. Repeatedly call `Reserve(row_cell)` to set the presets.
 
 1. Call `Search(count)` to start solving the problem. The solution will be printed
-   (or you can also store it) whenever a solution has been found.
+   (or you can also store it) whenever a solution is found.
 
-1. To initialize everything for the next problem, _first_ call `UnchooseAll()`,
+1. To initialize everything and prepare for the next problem, _first_ call `UnchooseAll()`,
    _then_ call `UnreserveAll()`, and you can get the full grid back.
 
 ## How is Hanidoku different from Sudoku
 
 I made the Sudoku grid with four kinds of constraints (columns): every blank should have a number,
-every row / column / $3 \times 3$ block should have number 1 to 9. That is 324 dlx columns in total.
+every row / column /![](https://latex.codecogs.com/png.latex?3\times%203) block should have number 1 to 9. That is 324 dlx columns in total.
 So each column is compulsory, and under that constriant we can get exactly the legal solutions of sudoku.
 
 However, Hanidoku doesn't require every row / incline / decline has exactly 1 to 9.
