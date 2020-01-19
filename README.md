@@ -44,7 +44,7 @@ And the results are as follows.
 |                         Algorithm                          |   Time   |
 | :--------------------------------------------------------: | :------: |
 |                            DLX                             | 6.483ms  |
-| [depth-first search with heuristic](compare/sudoku_heu.cc) | 33.680ms |
+| [depth-first search with heuristic](compare/sudoku_heu.cc) | 24.950ms |
 | [depth-first search (no heuristic)](compare/sudoku_dfs.cc) | 51.271ms |
 
 Brutal-force searching is not too bad, but there is a gap when compared with DLX.
@@ -64,7 +64,9 @@ format for output when doing batch generating, then use convert command to get t
 
 `make`, `make all`, or `make install` for making both programs,
 `make sudoku` or `make hanidoku` for making single one.
-Binary executables are stored in `exe/`.
+They will use GNU C++ compiler `g++`. You can modify `Makefile` to change that.
+Binary executables will be stored in `exe/`.
+Precompiled files are compiled on macOS Mojave 10.14.6.
 
 ## Usage of DLX API
 

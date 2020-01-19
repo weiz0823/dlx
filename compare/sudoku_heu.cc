@@ -13,7 +13,8 @@ int counter = 0;
 bool check() {
     // check grid at current counter, 0 for ok
     int r, c, b;
-    for (r = 0; r < 9; ++r)
+    r = grids[counter].pos / 9;  // skip positions checked in findpos()
+    for (; r < 9; ++r)
         for (c = 0; c < 9; ++c) {
             if (grids[counter].grid[r][c] > 0) continue;
             b = r / 3 * 3 + c / 3;
@@ -38,11 +39,19 @@ int findpos() {
     int best_pos = 0;
     while (best_pos < 81 && grids[counter].grid[best_pos / 9][best_pos % 9] > 0)
         ++best_pos;
+    if (best_pos == 81) return 81;
     int r = best_pos / 9, c = best_pos % 9;
     int b = r / 3 * 3 + c / 3;
     int min_size =
         getsize(grids[counter].cand[0][r] & grids[counter].cand[1][c] &
                 grids[counter].cand[2][b]);
+    if (min_size <= 1) {
+        grids[counter].pos = best_pos;
+        if (min_size)
+            return best_pos;
+        else
+            return -1;  // hint for backtrack
+    }
     int tmp_size;
     for (; r < 9; ++r)
         for (c = 0; c < 9; ++c) {
@@ -54,6 +63,13 @@ int findpos() {
             if (min_size > tmp_size) {
                 min_size = tmp_size;
                 best_pos = r * 9 + c;
+                if (min_size <= 1) {
+                    grids[counter].pos = best_pos;
+                    if (min_size)
+                        return best_pos;
+                    else
+                        return -1;  // hint for backtrack
+                }
             }
         }
     grids[counter].pos = best_pos;
@@ -82,13 +98,14 @@ void dfs() {
         grids[counter].cand[1][c] ^= 1 << off;
         grids[counter].cand[2][b] ^= 1 << off;
         // while (pos < 81 && grids[counter].grid[pos / 9][pos % 9] > 0) ++pos;
-        if (findpos() == 81) {
+        pos = findpos();
+        if (pos == 81) {
             memcpy(solutions + solution_counter, grids + counter, sizeof(Grid));
             ++solution_counter;
             if (solution_counter == 2) return;
         }
         // grids[counter].pos = pos;
-        if (!check()) dfs();
+        if (pos != -1 && !check()) dfs();
         if (solution_counter == 2) return;
         ++off;
         cand >>= 1;
