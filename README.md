@@ -21,7 +21,7 @@ solving & generating.
   Limit of 22 may take about 1s to 2s. Limit of 21 may take several seconds.
   Limit of 20 may take much much longer. Stricter limits are not tested.
 
-- Hanidoku solving costs 16ms on average, testing on 172 puzzles in puzzle set [data/hanidoku/puzzles.txt](data/hanidoku/puzzles.txt).
+- Hanidoku solving costs 10ms on average, testing on 172 puzzles in puzzle set [data/hanidoku/puzzles.txt](data/hanidoku/puzzles.txt).
 
 - For Hanidoku generating, it may take several seconds, but will often give you 5--10 clues,
   because the generating function requires that no clue in the puzzle can be erased to get another
