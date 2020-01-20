@@ -1,147 +1,78 @@
-#include "hanidoku.h"
-
 #include <chrono>
+
+#include "hanidoku.h"
 HanidokuGrid::HanidokuGrid() {
     // init full grid
     int t = 0, m = 0, len;
-    for (int i = 0; i < 549; ++i) {
-        row_[i].pos_ = i / 9;
-        row_[i].n_ = i % 9;
-        Insert(row_ + i, &head_, 'C');
-    }
-    for (int r = 0; r < 61; ++r) {
-        Insert(col_ + t, &head_, 'R');
-        for (int n = 0; n < 9; ++n) {
-            Insert(cell_ + m, col_ + t, 'C');
-            Insert(cell_ + m, row_ + r * 9 + n, 'R');
-            ++m;
-        }
-        ++t;
-    }
-    int rpos[9] = {0, 5, 11, 18, 26, 34, 41, 47, 52};
+    dlx::DlxCell *start, *end;
+    start = col_;
+    end = col_ + 304;
+    for (dlx::DlxCell* i = start; i != end; ++i) Insert(i, &head_, 'R');
     int cstart, cend;
-    int n, p;
-    // row
     for (int r = 0; r < 9; ++r) {
-        len = 9 - std::abs(4 - r);
         cstart = (r < 5) ? 0 : r - 4;
         cend = (r < 5) ? r + 5 : 9;
-        for (n = 0; n + len < 9; ++n) {  // n and n+p exist
-            Insert(col_ + t, &head_, 'R');
-            for (int c = cstart; c < cend; ++c) {
-                Insert(cell_ + m, col_ + t, 'C');
-                Insert(cell_ + m, row_ + (rpos[r] + c) * 9 + n, 'R');
+        for (int c = cstart; c < cend; ++c) {
+            for (int n = 0; n < 9; ++n) {
+                row_[t].n_ = n;
+                row_[t].pos_ = t / 9;
+                Insert(row_ + t, &head_, 'C');
+                Insert(cell_ + m, row_ + t, 'R');
+                Insert(cell_ + m, col_ + t / 9, 'C');
                 ++m;
-                Insert(cell_ + m, col_ + t, 'C');
-                Insert(cell_ + m, row_ + (rpos[r] + c) * 9 + n + len, 'R');
+                Insert(cell_ + m, row_ + t, 'R');
+                Insert(cell_ + m, col_ + 61 + r * 9 + n, 'C');
                 ++m;
-            }
-            ++t;
-            for (p = len + 1; n + p < 9; ++p) {
-                Insert(col_ + t, &head_, 'R');
-                col_[t].type_ = 0;
-                for (int c = cstart; c < cend; ++c) {
-                    Insert(cell_ + m, col_ + t, 'C');
-                    Insert(cell_ + m, row_ + (rpos[r] + c) * 9 + n, 'R');
+                Insert(cell_ + m, row_ + t, 'R');
+                Insert(cell_ + m, col_ + 142 + c * 9 + n, 'C');
+                ++m;
+                Insert(cell_ + m, row_ + t, 'R');
+                Insert(cell_ + m, col_ + 223 + (4 + c - r) * 9 + n, 'C');
+                ++m;
+                // row len
+                len = 9 - std::abs(4 - r);
+                for (int i = 0; i <= n - len; ++i) {
+                    Insert(cell_ + m, row_ + t, 'R');
+                    Insert(cell_ + m, col_ + 61 + r * 9 + i, 'X');
                     ++m;
-                    Insert(cell_ + m, col_ + t, 'C');
-                    Insert(cell_ + m, row_ + (rpos[r] + c) * 9 + n + p, 'R');
-                    ++m;
+                    col_[61 + r * 9 + i].type_ = 0;
                 }
-                ++t;
-            }
-        }
-        for (; n < len; ++n) {  // n must exist
-            Insert(col_ + t, &head_, 'R');
-            for (int c = cstart; c < cend; ++c) {
-                Insert(cell_ + m, col_ + t, 'C');
-                Insert(cell_ + m, row_ + (rpos[r] + c) * 9 + n, 'R');
-                ++m;
-            }
-            ++t;
-        }
-    }
-    // column
-    for (int r = 0; r < 9; ++r) {
-        len = 9 - std::abs(4 - r);
-        cstart = (r < 5) ? 0 : r - 4;
-        cend = (r < 5) ? r + 5 : 9;
-        for (n = 0; n + len < 9; ++n) {  // n and n+p exist
-            Insert(col_ + t, &head_, 'R');
-            for (int c = cstart; c < cend; ++c) {
-                Insert(cell_ + m, col_ + t, 'C');
-                Insert(cell_ + m, row_ + (rpos[c] + r) * 9 + n, 'R');
-                ++m;
-                Insert(cell_ + m, col_ + t, 'C');
-                Insert(cell_ + m, row_ + (rpos[c] + r) * 9 + n + len, 'R');
-                ++m;
-            }
-            ++t;
-            for (p = len + 1; n + p < 9; ++p) {
-                Insert(col_ + t, &head_, 'R');
-                col_[t].type_ = 0;
-                for (int c = cstart; c < cend; ++c) {
-                    Insert(cell_ + m, col_ + t, 'C');
-                    Insert(cell_ + m, row_ + (rpos[c] + r) * 9 + n, 'R');
+                for (int i = n + len; i < 9; ++i) {
+                    Insert(cell_ + m, row_ + t, 'R');
+                    Insert(cell_ + m, col_ + 61 + r * 9 + i, 'X');
                     ++m;
-                    Insert(cell_ + m, col_ + t, 'C');
-                    Insert(cell_ + m, row_ + (rpos[c] + r) * 9 + n + p, 'R');
-                    ++m;
+                    col_[61 + r * 9 + i].type_ = 0;
                 }
-                ++t;
-            }
-        }
-        for (; n < len; ++n) {  // n must exist
-            Insert(col_ + t, &head_, 'R');
-            for (int c = cstart; c < cend; ++c) {
-                Insert(cell_ + m, col_ + t, 'C');
-                Insert(cell_ + m, row_ + (rpos[c] + r) * 9 + n, 'R');
-                ++m;
-            }
-            ++t;
-        }
-    }
-    // diagonal = col - row + 4
-    for (int r = 0; r < 9; ++r) {
-        len = 9 - std::abs(4 - r);
-        cstart = (r < 5) ? 0 : r - 4;
-        cend = (r < 5) ? r + 5 : 9;
-        for (n = 0; n + len < 9; ++n) {  // n and n+p exist
-            Insert(col_ + t, &head_, 'R');
-            for (int c = cstart; c < cend; ++c) {
-                Insert(cell_ + m, col_ + t, 'C');
-                Insert(cell_ + m, row_ + (rpos[c - r + 4] + c) * 9 + n, 'R');
-                ++m;
-                Insert(cell_ + m, col_ + t, 'C');
-                Insert(cell_ + m, row_ + (rpos[c - r + 4] + c) * 9 + n + len,
-                       'R');
-                ++m;
-            }
-            ++t;
-            for (p = len + 1; n + p < 9; ++p) {
-                Insert(col_ + t, &head_, 'R');
-                col_[t].type_ = 0;
-                for (int c = cstart; c < cend; ++c) {
-                    Insert(cell_ + m, col_ + t, 'C');
-                    Insert(cell_ + m, row_ + (rpos[c - r + 4] + c) * 9 + n,
-                           'R');
+                // column len
+                len = 9 - std::abs(4 - c);
+                for (int i = 0; i <= n - len; ++i) {
+                    Insert(cell_ + m, row_ + t, 'R');
+                    Insert(cell_ + m, col_ + 142 + c * 9 + i, 'X');
                     ++m;
-                    Insert(cell_ + m, col_ + t, 'C');
-                    Insert(cell_ + m, row_ + (rpos[c - r + 4] + c) * 9 + n + p,
-                           'R');
-                    ++m;
+                    col_[142 + c * 9 + i].type_ = 0;
                 }
-                ++t;
+                for (int i = n + len; i < 9; ++i) {
+                    Insert(cell_ + m, row_ + t, 'R');
+                    Insert(cell_ + m, col_ + 142 + c * 9 + i, 'X');
+                    ++m;
+                    col_[142 + c * 9 + i].type_ = 0;
+                }
+                // diag len
+                len = 9 - std::abs(c - r);
+                for (int i = 0; i <= n - len; ++i) {
+                    Insert(cell_ + m, row_ + t, 'R');
+                    Insert(cell_ + m, col_ + 223 + (4 + c - r) * 9 + i, 'X');
+                    ++m;
+                    col_[223 + (4 + c - r) * 9 + i].type_ = 0;
+                }
+                for (int i = n + len; i < 9; ++i) {
+                    Insert(cell_ + m, row_ + t, 'R');
+                    Insert(cell_ + m, col_ + 223 + (4 + c - r) * 9 + i, 'X');
+                    ++m;
+                    col_[223 + (4 + c - r) * 9 + i].type_ = 0;
+                }
+                t++;
             }
-        }
-        for (; n < len; ++n) {  // n must exist
-            Insert(col_ + t, &head_, 'R');
-            for (int c = cstart; c < cend; ++c) {
-                Insert(cell_ + m, col_ + t, 'C');
-                Insert(cell_ + m, row_ + (rpos[c - r + 4] + c) * 9 + n, 'R');
-                ++m;
-            }
-            ++t;
         }
     }
     InitStacks(549);

@@ -13,6 +13,8 @@
 // 6: --2345678
 // 7: ---345678
 // 8: ----45678
+// int rpos[9] = {0, 5, 11, 18, 26, 34, 41, 47, 52};
+// pos = rpos[r] + c
 // print:
 //   .---------.
 //  / 0 0 0 0 0 \
@@ -22,7 +24,8 @@
 class HanidokuGrid;
 class HanidokuRowCell : public dlx::DlxCell {
    public:
-    int r_ = -1, c_ = -1, n_ = -1;  // row, column, number
+    // int r_ = -1, c_ = -1, n_ = -1;  // row, column, number
+    int n_ = -1;
     int pos_ = -1;
     HanidokuRowCell() {}
     virtual ~HanidokuRowCell() {}
@@ -32,7 +35,7 @@ class HanidokuRowCell : public dlx::DlxCell {
 };
 class HanidokuGrid : public dlx::DlxGrid {
    private:
-    dlx::DlxCell cell_[5000];
+    dlx::DlxCell cell_[4000];
     dlx::DlxCell col_[304];
     void PrintSolution(int count);
 

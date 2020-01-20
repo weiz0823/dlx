@@ -10,3 +10,7 @@ sudoku: src/dlx.cc src/sudoku.cc
 hanidoku: src/dlx.cc src/hanidoku.cc
 	$(CXX) $(CXXFLAGS) src/dlx.cc src/hanidoku.cc \
 		-o exe/hanidoku
+
+hanidoku_old: src/dlx.cc src/hanidoku_old.cc
+	$(CXX) $(CXXFLAGS) src/dlx.cc src/hanidoku_old.cc \
+		-o exe/hanidoku_old

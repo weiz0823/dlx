@@ -64,9 +64,11 @@ format for output when doing batch generating, then use convert command to get t
 
 `make`, `make all`, or `make install` for making both programs,
 `make sudoku` or `make hanidoku` for making single one.
+There is an old version of Hanidoku program, which uses different design of constraints.
+It's a bit slower, but kept for comparison. By `make hanidoku_old` you can compile it.
 They will use GNU C++ compiler `g++`. You can modify `Makefile` to change that.
 Binary executables will be stored in `exe/`.
-Precompiled files are compiled on macOS Mojave 10.14.6.
+Precompiled files were compiled on macOS Mojave 10.14.6.
 
 ## Usage of DLX API
 
